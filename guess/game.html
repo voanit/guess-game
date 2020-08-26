@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>朴新教育IT部门 の 你来比划我来猜</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <link rel="stylesheet" href="./utils/layui/css/layui.css" />
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- 剩余时间 -->
+      <div id="time-bar">
+        <div id="time-bar-process"></div>
+      </div>
+
+      <!-- 答题卡 -->
+      <div id="questions">
+        <div class="question" :id="'questions-'+random">
+          <span>{{random}}</span>{{word[random]}}
+        </div>
+        <div class="question" :id="'questions-'+num">! 游戏结束 !</div>
+      </div>
+
+      <!-- 操作 -->
+      <div class="buttons buttons-op-switch">
+        <button
+          class="layui-btn layui-btn-normal layui-btn-radius"
+          id="btn-restart-game"
+        >
+          重新开始游戏
+        </button>
+        <button
+          class="layui-btn layui-btn-normal layui-btn-radius"
+          id="btn-skip"
+        >
+          跳过这一题
+        </button>
+      </div>
+
+      <!-- 统计信息 -->
+      <div id="statistic-info">
+        正确: <span id="statistic-info-correct">0</span> 题 &nbsp; 错误:
+        <span id="statistic-info-error">0</span> 题 &nbsp; 跳过:
+        <span id="statistic-info-skip">0</span> 题 &nbsp;
+      </div>
+
+      <!-- 操作 -->
+      <div class="buttons buttons-op-tof">
+        <button
+          class="layui-btn layui-btn-big layui-btn-green layui-btn-radius"
+          id="btn-correct"
+        >
+          正确
+        </button>
+        <button
+          class="layui-btn layui-btn-big layui-btn-danger layui-btn-radius"
+          id="btn-error"
+        >
+          错误
+        </button>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="./utils/layui/layui.js"></script>
+    <script src="./js/jquery.min.js"></script>
+
+    <script>
+      var itv; // 时间条计时器
+
+      var qCorrectNum = 0; // 正确的数量
+      var qErrorNum = 0; // 错误的数量
+      var qSkipNum = 0; // 跳过的数量
+      var qTotalNum = GetQueryString("qNum"); // 总数量
+
+      function GetQueryString(name) {
+        var href = decodeURI(decodeURI(window.location.search));
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = href.substr(1).match(reg);
+        if (r != null) return unescape(r[2]);
+        return null;
+      }
+      var app = new Vue({
+        el: "#app",
+        data: {
+          word: [],
+          num: 0,
+          random: 0,
+        },
+        methods: {
+          getWord() {
+            var _this = this;
+            $.getJSON("js/question.json", function (data) {
+              _this.word = data.word;
+              _this.random = _this.randomCount();
+            });
+          },
+          randomCount() {
+            return Math.ceil(Math.random() * this.word.length);
+          },
+          // 切换题目
+          nextOne(op) {
+            if (qCorrectNum + qErrorNum + qSkipNum + 1 >= qTotalNum) {
+              clearInterval(itv);
+            }
+
+            if (qCorrectNum + qErrorNum + qSkipNum + 1 > qTotalNum) {
+              layui.use("layer", function () {
+                var layer = layui.layer;
+                layer.msg("游戏结束 !");
+              });
+              return;
+            }
+            this.random = this.randomCount();
+            $("#questions-" + this.random).show();
+
+            switch (op) {
+              case 1: // 正确
+                qCorrectNum++;
+                break;
+              case 2: // 错误
+                qErrorNum++;
+                break;
+              case 3: // 跳过这一题
+                qSkipNum++;
+                break;
+              default:
+                break;
+            }
+
+            // 重新统计数据
+            this.displayResult();
+          },
+
+          // 渲染数据
+          displayResult() {
+            $("#statistic-info-correct").text(qCorrectNum);
+            $("#statistic-info-error").text(qErrorNum);
+            $("#statistic-info-skip").text(qSkipNum);
+          },
+          // ios截取参数字符串
+          GetQueryString(name) {
+            var href = decodeURI(decodeURI(window.location.search));
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = href.substr(1).match(reg);
+            if (r != null) return unescape(r[2]);
+            return null;
+          },
+        },
+        created() {
+          this.num = GetQueryString("qNum");
+          this.time = GetQueryString("qTime");
+        },
+        mounted() {
+          _this = this;
+          this.getWord();
+          // 重新开始游戏
+          $("#btn-restart-game").click(function () {
+            if (confirm("确定要重新开始游戏吗？")) {
+              window.location.href = "index.html";
+            }
+          });
+
+          // 正确
+          $("#btn-correct").click(function () {
+            _this.nextOne(1);
+          });
+
+          // 错误
+          $("#btn-error").click(function () {
+            _this.nextOne(2);
+          });
+
+          // 跳过这一题
+          $("#btn-skip").click(function () {
+            _this.nextOne(3);
+          });
+
+          // 显示第一题
+          $("#questions-" + this.random).show();
+
+          // 渲染统计数据
+          _this.displayResult();
+
+          // 计时开始
+          var qTime = GetQueryString("qTime"); // total time
+          var sec = 0; // time already used
+
+          timeBar = $("#time-bar-process");
+          itv = setInterval(function () {
+            sec++;
+            bi = (sec / qTime) * 100;
+
+            if (bi >= 50) {
+              timeBar.css({ "background-color": "orange" });
+            }
+
+            if (bi >= 75) {
+              timeBar.css({ "background-color": "red" });
+            }
+
+            timeBar.css({ width: bi + "%" });
+
+            if (bi >= 100) {
+              clearInterval(itv);
+              layui.use("layer", function () {
+                var layer = layui.layer;
+                layer.msg("时间到了 !");
+              });
+            }
+          }, 1000);
+        },
+      });
+    </script>
+  </body>
+</html>
