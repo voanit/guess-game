@@ -70,8 +70,6 @@
     <script src="../js/jquery.min.js"></script>
 
     <script>
-      var itv; // 时间条计时器
-
       var qCorrectNum = 0; // 正确的数量
       var qErrorNum = 0; // 错误的数量
       var qSkipNum = 0; // 跳过的数量
@@ -90,6 +88,7 @@
           word: [],
           num: 0,
           random: 0,
+          itv: 0,
         },
         methods: {
           getWord() {
@@ -105,7 +104,7 @@
           // 切换题目
           nextOne(op) {
             if (qCorrectNum + qErrorNum + qSkipNum + 1 >= qTotalNum) {
-              clearInterval(itv);
+              clearInterval(this.itv);
             }
 
             if (qCorrectNum + qErrorNum + qSkipNum + 1 > qTotalNum) {
@@ -191,7 +190,7 @@
           var sec = 0; // time already used
 
           timeBar = $("#time-bar-process");
-          itv = setInterval(function () {
+          this.itv = setInterval(function () {
             sec++;
             bi = (sec / qTime) * 100;
 
@@ -206,7 +205,7 @@
             timeBar.css({ width: bi + "%" });
 
             if (bi >= 100) {
-              clearInterval(itv);
+              clearInterval(this.itv);
               layui.use("layer", function () {
                 var layer = layui.layer;
                 layer.msg("时间到了 !");
