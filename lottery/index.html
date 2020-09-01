@@ -1,0 +1,154 @@
+<!--
+ * @Descripttion: 
+ * @Author: voanit
+ * @Date: 2020-09-01 09:10:03
+ * @LastEditors: voanit
+ * @LastEditTime: 2020-09-01 11:10:59
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>抽号</title>
+    <style>
+      .list {
+        line-height: 35px;
+        margin-bottom: 10px;
+      }
+      .list input {
+        height: 22px;
+        line-height: 22px;
+        width: 50px;
+      }
+      .list button {
+        min-width: 60px;
+        padding: 0 10px;
+        line-height: 25px;
+        border-radius: 4px;
+        background-color: chocolate;
+        border: 1px solid #333;
+        color: #fff;
+        cursor: pointer;
+      }
+      .list button:focus {
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div
+        style="
+          width: 300px;
+          margin: 0 auto;
+          padding-top: 30px;
+          padding-bottom: 30px;
+        "
+        v-if="member"
+      >
+        <div class="list">
+          全部门成员：{{numall}} {{member[numall]}}<br /><button
+            @click="yaohao(1,77,'numall')"
+          >
+            开始抽号
+          </button>
+        </div>
+        <div class="list">
+          研发一组：{{num1}} {{member[num1]}}<br /><button
+            @click="yaohao(3,17,'num1')"
+          >
+            开始抽号
+          </button>
+        </div>
+        <div class="list">
+          研发二组：{{num2}} {{member[num2]}}<br /><button
+            @click="yaohao(18,24,'num2')"
+          >
+            开始抽号
+          </button>
+        </div>
+        <div class="list">
+          研发三组：{{num3}} {{member[num3]}}<br /><button
+            @click="yaohao(25,39,'num3')"
+          >
+            开始抽号
+          </button>
+        </div>
+        <div class="list">
+          研发四组：{{num4}} {{member[num4]}}<br /><button
+            @click="yaohao(71,77,'num4')"
+          >
+            开始抽号
+          </button>
+        </div>
+        <div class="list">
+          产品运营组：{{num5}} {{member[num5]}}<br /><button
+            @click="yaohao(40,58,'num5')"
+          >
+            开始抽号
+          </button>
+        </div>
+        <div class="list">
+          运维质控组：{{num6}} {{member[num6]}}<br /><button
+            @click="yaohao(59,70,'num6')"
+          >
+            开始抽号
+          </button>
+        </div>
+
+        <div class="list">
+          自定义抽号：{{numcustom}}<br /><input
+            placeholder="请输入范围最小值"
+            v-model="min"
+            type="number"
+          />
+          -
+          <input
+            v-model="max"
+            placeholder="请输入范围最大值"
+            type="number"
+          />&nbsp;&nbsp;<button @click="yaohao(min,max,'numcustom')">
+            摇号
+          </button>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script>
+      var app = new Vue({
+        el: "#app",
+        data: {
+          num1: null,
+          num2: null,
+          num3: null,
+          num4: null,
+          num5: null,
+          num6: null,
+          numall: null,
+          numcustom: null,
+          min: 0,
+          max: 100,
+          member: {},
+        },
+        methods: {
+          yaohao: function (min, max, group) {
+            var num = num;
+            num = parseInt(Math.random() * (max - min + 1) + min, 10);
+            this[group] = num;
+          },
+          getMember() {
+            var _this = this;
+            $.getJSON("../js/person.json", function (data) {
+              _this.member = data;
+            });
+          },
+        },
+        created() {
+          this.getMember();
+        },
+      });
+    </script>
+  </body>
+</html>
