@@ -3,7 +3,7 @@
  * @Author: voanit
  * @Date: 2020-09-17 18:50:10
  * @LastEditors: voanit
- * @LastEditTime: 2020-09-17 18:50:33
+ * @LastEditTime: 2020-09-17 19:00:18
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -14,7 +14,13 @@
   </head>
   <body>
     <iframe
+      id="theframe"
       src="https://wxxapp.chinaunicom.cn/newwofortg/mobile/app/business/index.html?page=ho&token=0021_350&eparchyCode=0021&tgId=undefined&flag=undefined&ms=AGT042684"
     ></iframe>
   </body>
+  <script>
+    alert(2);
+    var _theframe = document.getElementById("theframe");
+    _theframe.contentWindow.location.href = _theframe.src;
+  </script>
 </html>
